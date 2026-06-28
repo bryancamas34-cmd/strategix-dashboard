@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Strategix Suite - Portal de Acceso Corporativo</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --brand: #2563eb;
+            --bg: #f1f5f9;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; border: 1px solid #cbd5e1; }
+        .logo-area h2 { margin: 0; color: var(--primary); font-size: 26px; }
+        .logo-area p { margin: 5px 0 25px 0; color: #64748b; font-size: 13px; font-weight: 600; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px; }
+        input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        input:focus { border-color: var(--brand); outline: none; }
+        .btn-login { width: 100%; padding: 14px; background: var(--brand); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s; }
+        .btn-login:hover { background: #1d4ed8; }
+        .error-msg { color: #ef4444; font-size: 13px; margin-top: 15px; display: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo-area">
+            <h2>Strategix Suite</h2>
+            <p>Plataforma de Inteligencia Competitiva</p>
+        </div>
+        
+        <div class="form-group">
+            <label>Usuario Consultor / Alumno</label>
+            <input type="text" id="user" placeholder="admin">
+        </div>
+        <div class="form-group">
+            <label>Contraseña de Acceso</label>
+            <input type="password" id="pass" placeholder="••••••••">
+        </div>
+
+        <button class="btn-login" onclick="intentarLogin()">Iniciar Sesión Segura</button>
+        <div id="error" class="error-msg">Credenciales incorrectas de control.</div>
+    </div>
+
+    <script>
+        // Al cargar la página, nos aseguramos de limpiar cualquier sesión previa
+        localStorage.removeItem('sc_sesion_activa');
+
+        function intentarLogin() {
+            let u = document.getElementById('user').value.trim();
+            let p = document.getElementById('pass').value;
+
+            // Definimos un usuario y contraseña de simulación (puedes cambiarlos)
+            if(u === "admin" && p === "1234") {
+                localStorage.setItem('sc_sesion_activa', 'true');
+                window.location.href = "dashboard.html"; // Redirección al sistema
+            } else {
+                let err = document.getElementById('error');
+                err.style.display = 'block';
+                err.innerText = "Error: Usuario o contraseña inválidos para el sínodo.";
+            }
+        }
+    </script>
+</body>
+</html>

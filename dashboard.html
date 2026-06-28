@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Strategix Competitive Intelligence Suite - Corporate Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --brand: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card-border: #cbd5e1;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #1e293b; }
+        .header { background-color: var(--primary); color: white; padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--brand); }
+        .main-container { max-width: 1450px; margin: 30px auto; padding: 0 20px; }
+        
+        .tabs { display: flex; gap: 8px; margin-bottom: 25px; }
+        .tab-btn { padding: 14px 24px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; color: #475569; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s; }
+        .tab-btn:hover { background: #cbd5e1; }
+        .tab-btn.active { background: var(--brand); color: white; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
+        .tab-content { display: none; background: white; padding: 35px; border-radius: 8px; border: 1px solid var(--card-border); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .tab-content.active { display: block; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+        textarea, input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: white; transition: border 0.2s; }
+        textarea:focus, input:focus, select:focus { border-color: var(--brand); outline: none; }
+        textarea { height: 100px; resize: none; }
+
+        .form-analytics { background: #f8fafc; border: 2px solid #e2e8f0; padding: 30px; border-radius: 8px; margin-bottom: 30px; }
+        .form-grid-largo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; }
+        
+        .weight-badge { background: #eff6ff; color: var(--brand); padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 13px; border: 1px solid #bfdbfe; display: inline-block; margin-bottom: 15px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        th { background-color: #f1f5f9; color: #0f172a; font-weight: 700; text-transform: uppercase; font-size: 12px; }
+        
+        .fila-verde { background-color: #f0fdf4 !important; }
+        .fila-amarillo { background-color: #fffbeb !important; }
+        .fila-rojo { background-color: #fef2f2 !important; }
+
+        .semaforo-esfera { display: inline-block; width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; margin-right: 8px; }
+        .esfera-v { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
+        .esfera-a { background-color: var(--warning); box-shadow: 0 0 8px var(--warning); }
+        .esfera-r { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+        /* Estabilidad Absoluta contra Temblores de Pantalla */
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(550px, 1fr)); gap: 30px; margin-top: 20px; }
+        .chart-card { background: white; padding: 25px; border-radius: 8px; border: 1px solid var(--card-border); height: 380px; position: relative; width: 100%; box-sizing: border-box; }
+
+        .alert-panel { background: #fef2f2; border: 1px solid #fee2e2; border-left: 5px solid var(--danger); padding: 20px; border-radius: 6px; margin-bottom: 25px; }
+        .contingency-box { margin-top: 10px; padding: 10px 0; }
+        .report-box { background: #f1f5f9; border: 1px solid var(--card-border); padding: 35px; border-radius: 8px; text-align: center; }
+
+        .btn { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s; }
+        .btn-brand { background: var(--brand); color: white; }
+        .btn-brand:hover { background: #1d4ed8; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-del { background: none; border: none; color: var(--danger); cursor: pointer; font-weight: bold; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h2 style="margin:0; font-size:22px;">Strategix Business Suite</h2>
+            <small style="color: #94a3b8; font-weight: 600;">Estrategia Competitiva & Control de Mando Multivariable</small>
+        </div>
+        <a href="index.html" style="background:#334155; color:white; text-decoration:none; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:bold;">Cerrar Sesión</a>
+    </div>
+
+    <div class="main-container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-filosofia')">1. Diagnóstico de Identidad</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-operacion')">2. Matriz de Indicadores (BSC)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-graficas')">3. Inteligencia Visual (Gráficas)</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-reportes')">4. Dictamen de Auditoría</button>
+        </div>
+
+        <!-- TAB 1: FILOSOFÍA -->
+        <div id="tab-filosofia" class="tab-content active">
+            <h3 style="margin-top:0;">Direccionamiento Estratégico Corporativo</h3>
+            <div class="grid-2">
+                <div><label style="font-weight:700; font-size:13px; color:#475569;">Misión Institucional</label><textarea id="mision" onchange="guardarIdentidad()" placeholder="Escriba la misión enfocada en ventajas competitivas..."></textarea></div>
+                <div><label style="font-weight:700; font-size:13px; color:#475569;">Visión Estratégica</label><textarea id="vision" onchange="guardarIdentidad()" placeholder="Proyección de posicionamiento en el mercado..."></textarea></div>
+            </div>
+            <h3>Análisis del Entorno FODA (Matrices de Cruce Competitivo)</h3>
+            <div class="grid-2">
+                <div style="background:#f0fdf4; padding:20px; border-radius:6px; border:1px solid #bbf7d0;"><strong>💪 Fortaleza Crítica (F1)</strong><input id="foda_f" onchange="guardarIdentidad()"></div>
+                <div style="background:#eff6ff; padding:20px; border-radius:6px; border:1px solid #bfdbfe;"><strong>🚀 Oportunidad de Mercado (O1)</strong><input id="foda_o" onchange="guardarIdentidad()"></div>
+                <div style="background:#fffbeb; padding:20px; border-radius:6px; border:1px solid #fef3c7;"><strong>⚠️ Debilidad Operativa (D1)</strong><input id="foda_d" onchange="guardarIdentidad()"></div>
+                <div style="background:#fef2f2; padding:20px; border-radius:6px; border:1px solid #fee2e2;"><strong>💣 Amenaza del Entorno (A1)</strong><input id="foda_a" onchange="guardarIdentidad()"></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MATRIZ OPERATIVA -->
+        <div id="tab-operacion" class="tab-content">
+            <div class="form-analytics">
+                <h3 style="margin-top:0; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">Inyección Rigurosa de KPIs</h3>
+                <div class="weight-badge" id="peso_disponible_txt">Peso Estratégico Disponible: 100%</div>
+                
+                <div class="form-grid-largo">
+                    <div class="form-group"><label>Objetivo Estratégico</label><input type="text" id="kpi_obj" placeholder="Ej: Reducir dependencia fósil"></div>
+                    <div class="form-group"><label>Nombre del KPI</label><input type="text" id="kpi_nom" placeholder="Ej: Costo de mantenimiento"></div>
+                    <div class="form-group"><label>Peso en la Estrategia (%)</label><input type="number" id="kpi_peso" placeholder="Ej: 25"></div>
+                    <div class="form-group"><label>Dirección del Indicador</label>
+                        <select id="kpi_direccion">
+                            <option value="MAX">Maximizar (Aumentar es óptimo)</option>
+                            <option value="MIN">Minimizar (Reducir es óptimo)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Alineación Matriz FODA</label>
+                        <select id="kpi_foda">
+                            <option value="Fortaleza F1">Fortaleza F1</option>
+                            <option value="Oportunidad O1">Oportunidad O1</option>
+                            <option value="Debilidad D1">Debilidad D1</option>
+                            <option value="Amenaza A1">Amenaza A1</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Responsable Líder</label><input type="text" id="kpi_resp" placeholder="Ej: Jefatura de Planta"></div>
+                    <div class="form-group"><label>Meta Anual Estricta</label><input type="number" id="kpi_meta"></div>
+                    <div class="form-group"><label>Cierre Mes Anterior</label><input type="number" id="kpi_ant"></div>
+                    <div class="form-group"><label>Logro Real Actual</label><input type="number" id="kpi_act"></div>
+                </div>
+                <button class="btn btn-brand" style="margin-top:20px;" onclick="crearKpi()">Validar y Registrar en Matriz</button>
+            </div>
+
+            <h3>Cuadro de Mando Integral (Balanced Scorecard)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:130px;">Estado Crítico</th>
+                        <th>Objetivo / Métrica</th>
+                        <th>Dirección</th>
+                        <th>Cruce FODA</th>
+                        <th>Peso Relativo</th>
+                        <th>Planificado vs Actual</th>
+                        <th>Eficiencia Real</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla_kpis"></tbody>
+            </table>
+        </div>
+
+        <!-- TAB 3: GRÁFICAS -->
+        <div id="tab-graficas" class="tab-content">
+            <h3 style="margin-top:0;">Sala de Inteligencia Visual</h3>
+            <p style="color:#64748b; font-size:14px; margin-top:-10px;">Estructura optimizada de alta densidad para auditorías sin variaciones de tamaño de renderizado.</p>
+            
+            <div class="charts-grid">
+                <div class="chart-card"><canvas id="gPastel"></canvas></div>
+                <div class="chart-card"><canvas id="gDispersion"></canvas></div>
+                <div class="chart-card"><canvas id="gLineas"></canvas></div>
+                <div class="chart-card"><canvas id="gRadar"></canvas></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: REPORTES -->
+        <div id="tab-reportes" class="tab-content">
+            <h3 style="margin-top:0;">Centro de Consolidación y Dictamen Consultor</h3>
+            
+            <div class="grid-2" style="text-align:center;">
+                <div style="background:#f1f5f9; padding:25px; border-radius:8px; border:1px solid #cbd5e1;">
+                    <span style="color:#475569; font-weight:700; font-size:12px; text-transform:uppercase; display:block; margin-bottom:5px;">Índice de Eficiencia Estratégica Ponderada (IEEP)</span>
+                    <h1 id="eficiencia_global" style="font-size:46px; margin:0; color:var(--brand);">0.0%</h1>
+                    <small id="bsc_status_text" style="font-weight:bold; color:#64748b;"></small>
+                </div>
+                <div style="background:#f1f5f9; padding:25px; border-radius:8px; border:1px solid #cbd5e1;">
+                    <span style="color:#475569; font-weight:700; font-size:12px; text-transform:uppercase; display:block; margin-bottom:5px;">Estructura Macroeconómica del Cuadro</span>
+                    <h1 id="total_kpis" style="font-size:46px; margin:0; color:#0f172a;">0</h1>
+                    <small id="peso_acumulado_txt" style="font-weight:bold; color:#64748b;"></small>
+                </div>
+            </div>
+
+            <div id="panel_alertas" class="alert-panel" style="display:none; margin-top:25px;">
+                <strong style="color:#b91c1c; font-size:15px;">🚨 DESVIACIONES CRÍTICAS DETECTADAS QUE REQUIEREN ACCIÓN INMEDIATA:</strong>
+                <div id="lista_alertas" style="margin-top:15px; display:flex; flex-direction:column; gap:15px;"></div>
+            </div>
+
+            <div class="report-box" style="margin-top:25px;">
+                <h4 style="margin-top:0; font-size:16px;">Compilar y Descargar Informe Ejecutivo Oficial</h4>
+                <p style="color:#64748b; font-size:14px; margin-bottom:25px;">Exporta un documento formal estructurado bajo metodología de consultor estratégico corporativo para revisiones de junta directiva o sínodos de maestría.</p>
+                <button class="btn btn-success" style="padding:15px 35px;" onclick="exportarDataCompleta()">💾 Descargar Dictamen de Auditoría (.txt)</button>
+                <button class="btn" style="background:#94a3b8; color:white; margin-left:10px;" onclick="borrarTodo()">Formatear Base de Datos</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let kpis = JSON.parse(localStorage.getItem('sc_kpis')) || [];
+        let planesContingencia = JSON.parse(localStorage.getItem('sc_planes')) || {};
+        let charts = {};
+
+        window.onload = function() {
+            ['mision','vision','foda_f','foda_o','foda_d','foda_a'].forEach(id => {
+                document.getElementById(id).value = localStorage.getItem('sc_' + id) || '';
+            });
+            actualizarPesoDisponible();
+            renderTabla();
+        };
+
+        function guardarIdentidad() {
+            ['mision','vision','foda_f','foda_o','foda_d','foda_a'].forEach(id => {
+                localStorage.setItem('sc_' + id, document.getElementById(id).value);
+            });
+        }
+
+        function obtenerPesoAcumulado() {
+            return kpis.reduce((acc, curr) => acc + curr.peso, 0);
+        }
+
+        function actualizarPesoDisponible() {
+            let restante = 100 - obtenerPesoAcumulado();
+            document.getElementById('peso_disponible_txt').innerText = `Peso Estratégico Disponible: ${restante}%`;
+        }
+
+        function switchTab(evt, tabId) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
+            let buttons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+            
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            
+            if(tabId === 'tab-graficas') inicializarGraficas();
+            if(tabId === 'tab-reportes') calcularDashboardReportes();
+        }
+
+        function calcularEficienciaKpi(k) {
+            if (k.meta === 0) return 0;
+            let eff = 0;
+            if (k.direccion === "MAX") {
+                eff = (k.act / k.meta) * 100;
+            } else {
+                eff = (k.meta / k.act) * 100;
+            }
+            return Math.max(0, eff); // Evitar valores negativos extravagantes
+        }
+
+        function crearKpi() {
+            let obj = document.getElementById('kpi_obj').value.trim();
+            let nom = document.getElementById('kpi_nom').value.trim();
+            let peso = parseFloat(document.getElementById('kpi_peso').value);
+            let direccion = document.getElementById('kpi_direccion').value;
+            let foda = document.getElementById('kpi_foda').value;
+            let resp = document.getElementById('kpi_resp').value.trim();
+            let meta = parseFloat(document.getElementById('kpi_meta').value);
+            let ant = parseFloat(document.getElementById('kpi_ant').value);
+            let act = parseFloat(document.getElementById('kpi_act').value);
+
+            if(!obj || !nom || isNaN(peso) || isNaN(meta) || isNaN(ant) || isNaN(act) || meta <= 0 || act <= 0) {
+                alert("Error: Ingrese valores numéricos válidos y mayores a cero.");
+                return;
+            }
+
+            if(obtenerPesoAcumulado() + peso > 100) {
+                alert(`Error Estratégico: El peso de este KPI supera el 100% total de la organización. Solo te queda disponible un ${100 - obtenerPesoAcumulado()}%`);
+                return;
+            }
+
+            kpis.push({ id: Date.now(), obj, nom, peso, direccion, foda, resp, meta, ant, act });
+            localStorage.setItem('sc_kpis', JSON.stringify(kpis));
+            
+            // Limpiar campos
+            ['kpi_obj','kpi_nom','kpi_peso','kpi_resp','kpi_meta','kpi_ant','kpi_act'].forEach(id => document.getElementById(id).value = '');
+            
+            actualizarPesoDisponible();
+            renderTabla();
+        }
+
+        function removerKpi(id) {
+            kpis = kpis.filter(k => k.id !== id);
+            localStorage.setItem('sc_kpis', JSON.stringify(kpis));
+            actualizarPesoDisponible();
+            renderTabla();
+        }
+
+        function renderTabla() {
+            let tbody = document.getElementById('tabla_kpis');
+            tbody.innerHTML = '';
+
+            kpis.forEach(k => {
+                let eff = calcularEficienciaKpi(k);
+                let claseFila = '', htmlSemaforo = '';
+                
+                if(eff >= 95) {
+                    claseFila = 'fila-verde';
+                    htmlSemaforo = '<span class="semaforo-esfera esfera-v"></span><b style="color:#065f46;font-size:11px;">ÓPTIMO</b>';
+                } else if(eff >= 75) {
+                    claseFila = 'fila-amarillo';
+                    htmlSemaforo = '<span class="semaforo-esfera esfera-a"></span><b style="color:#92400e;font-size:11px;">PRECAUCIÓN</b>';
+                } else {
+                    claseFila = 'fila-rojo';
+                    htmlSemaforo = '<span class="semaforo-esfera esfera-r"></span><b style="color:#991b1b;font-size:11px;">CRÍTICO</b>';
+                }
+
+                let tr = document.createElement('tr');
+                tr.className = claseFila;
+                tr.innerHTML = `
+                    <td>${htmlSemaforo}</td>
+                    <td><strong>${k.obj}</strong><br><small style="color:#475569;">Métrica: ${k.nom} (${k.resp})</small></td>
+                    <td><small style="font-weight:bold; color:${k.direccion==='MAX'?'#10b981':'#ef4444'}">${k.direccion}</small></td>
+                    <td><small><b>${k.foda}</b></small></td>
+                    <td><b>${k.peso}%</b></td>
+                    <td><small>Meta: ${k.meta}<br>Real: <b>${k.act}</b></small></td>
+                    <td><strong>${eff.toFixed(1)}%</strong></td>
+                    <td><button class="btn-del" onclick="removerKpi(${k.id})">×</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function inicializarGraficas() {
+            Object.keys(charts).forEach(key => { if(charts[key]) charts[key].destroy(); });
+
+            let cVerde = 0, cAmarillo = 0, cRojo = 0;
+            let nombres = [], eficiencias = [], datasetsDispersion = [], datosLineasAnt = [], datosLineasAct = [];
+
+            kpis.forEach(k => {
+                let eff = parseFloat(calcularEficienciaKpi(k).toFixed(1));
+                nombres.push(k.nom);
+                eficiencias.push(eff);
+                datosLineasAct.push(k.act);
+                datosLineasAnt.push(k.ant);
+
+                if(eff >= 95) cVerde++;
+                else if(eff >= 75) cAmarillo++;
+                else cRojo++;
+
+                // Datos para gráfica de matriz competitiva de dispersión
+                datasetsDispersion.push({
+                    label: k.nom,
+                    data: [{ x: k.peso, y: eff, r: 10 }],
+                    backgroundColor: eff >= 95 ? '#10b981' : (eff >= 75 ? '#f59e0b' : '#ef4444')
+                });
+            });
+
+            // G1: PASTEL - ALINEACIÓN DE SALUD OPERATIVA
+            charts.g1 = new Chart(document.getElementById('gPastel').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Óptimo (>=95%)', 'Precaución (75-94%)', 'Crítico (<75%)'],
+                    datasets: [{ data: [cVerde, cAmarillo, cRojo], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Distribución de Alertas de Desempeño' } } }
+            });
+
+            // G2: DISPERSIÓN ESTRATÉGICA (PESO VS EFICIENCIA) -> MATRIZ DE RIESGO PORTER
+            charts.g2 = new Chart(document.getElementById('gDispersion').getContext('2d'), {
+                type: 'bubble',
+                data: { datasets: datasetsDispersion },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'Matriz de Impacto Competitivo (Peso % vs Eficiencia %)' } },
+                    scales: {
+                        x: { title: { display: true, text: 'Peso Crítico del Objetivo (%)' }, min: 0, max: 100 },
+                        y: { title: { display: true, text: 'Eficiencia de la Ejecución (%)' }, min: 0, max: 120 }
+                    }
+                }
+            });
+
+            // G3: TENDENCIAS DE DESPLAZAMIENTO MENSUAL
+            charts.g3 = new Chart(document.getElementById('gLineas').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: nombres,
+                    datasets: [
+                        { label: 'Histórico Mes Anterior', data: datosLineasAnt, borderColor: '#94a3b8', borderDash: [5, 5], fill: false, tension: 0.1 },
+                        { label: 'Cierre Actual Real', data: datosLineasAct, borderColor: '#2563eb', fill: false, tension: 0.1 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Desplazamiento y Volatilidad de Indicadores' } } }
+            });
+
+            // G4: COBERTURA RADAR BSC
+            charts.g4 = new Chart(document.getElementById('gRadar').getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: nombres,
+                    datasets: [{ label: 'Nivel de Cobertura de Metas (%)', data: eficiencias, backgroundColor: 'rgba(37, 99, 235, 0.1)', borderColor: '#2563eb', pointBackgroundColor: '#0f172a' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Radar de Simetría Corporativa' } }, scales: { r: { min: 0, max: 100 } } }
+            });
+        }
+
+        function registrarContingencia(kpiId, texto) {
+            planesContingencia[kpiId] = texto;
+            localStorage.setItem('sc_planes', JSON.stringify(planesContingencia));
+        }
+
+        function calcularDashboardReportes() {
+            let total = kpis.length;
+            document.getElementById('total_kpis').innerText = total;
+            
+            let pesoTotal = obtenerPesoAcumulado();
+            let pBadge = document.getElementById('peso_acumulado_txt');
+            pBadge.innerText = `Peso acumulado: ${pesoTotal}% de 100%`;
+            pBadge.style.color = pesoTotal === 100 ? '#10b981' : '#ef4444';
+
+            let divAlertas = document.getElementById('lista_alertas');
+            let panelAlertas = document.getElementById('panel_alertas');
+            divAlertas.innerHTML = '';
+
+            if (total === 0) {
+                document.getElementById('eficiencia_global').innerText = '0.0%';
+                panelAlertas.style.display = 'none';
+                return;
+            }
+
+            let ponderadoSuma = 0;
+            let flagAlerta = false;
+
+            kpis.forEach(k => {
+                let eff = calcularEficienciaKpi(k);
+                // Si el peso no está al 100%, se calcula el peso relativo actual cargado
+                ponderadoSuma += (eff * (k.peso / 100));
+
+                if (eff < 75) {
+                    flagAlerta = true;
+                    let planGuardado = planesContingencia[k.id] || '';
+                    
+                    let card = document.createElement('div');
+                    card.style.background = 'white';
+                    card.style.padding = '15px';
+                    card.style.borderRadius = '6px';
+                    card.style.border = '1px solid #fee2e2';
+                    card.innerHTML = `
+                        <span style="color:var(--danger); font-weight:bold;">⚠️ QUIEBRE DE ESTRATEGIA: [Líder: ${k.resp}]</span><br>
+                        El KPI <strong>"${k.nom}"</strong> está en un nivel crítico del <strong>${eff.toFixed(1)}%</strong> afectando el pilar FODA <strong>${k.foda}</strong>.<br>
+                        <div class="contingency-box">
+                            <label style="font-size:12px; font-weight:bold; color:#475569;">Inyectar Plan de Mitigación Competitiva para el Docente:</label>
+                            <input type="text" value="${planGuardado}" placeholder="Ej: Reajustar la cadena de suministros o cambiar proveedor..." onchange="registrarContingencia(${k.id}, this.value)">
+                        </div>
+                    `;
+                    divAlertas.appendChild(card);
+                }
+            });
+
+            panelAlertas.style.display = flagAlerta ? 'block' : 'none';
+            
+            let ieep = ponderadoSuma;
+            document.getElementById('eficiencia_global').innerText = ieep.toFixed(1) + '%';
+            
+            let sText = document.getElementById('bsc_status_text');
+            if (ieep >= 90) { sText.innerText = "Organización en Ventaja Competitiva Sostenible"; sText.style.color = 'var(--success)'; }
+            else if (ieep >= 70) { sText.innerText = "Desempeño Vulnerable, Vulnerabilidad de Mercado"; sText.style.color = 'var(--warning)'; }
+            else { sText.innerText = "Riesgo de Quiebre Operativo / Desalineación Total"; sText.style.color = 'var(--danger)'; }
+        }
+
+        function exportarDataCompleta() {
+            if(obtenerPesoAcumulado() !== 100) {
+                if(!confirm("Advertencia: El peso estratégico total de los KPIs no suma el 100%. Un consultor senior no emitiría este reporte. ¿Desea continuar de todos modos?")) return;
+            }
+
+            let r = "=====================================================================\n";
+            r += "   DICTAMEN DE AUDITORÍA DE ESTRATEGIA COMPETITIVA - STRATEGIX SUITE \n";
+            r += "=====================================================================\n\n";
+            r += "📋 DIRECCIONAMIENTO CORPORATIVO:\n";
+            r += "   Misión: " + (localStorage.getItem('sc_mision') || 'No declarada') + "\n";
+            r += "   Visión: " + (localStorage.getItem('sc_vision') || 'No declarada') + "\n\n";
+            r += "📊 ÍNDICE DE EFICIENCIA ESTRATÉGICA GLOBAL (IEEP): " + document.getElementById('eficiencia_global').innerText + "\n";
+            r += "   Status: " + document.getElementById('bsc_status_text').innerText + "\n\n";
+            r += "---------------------------------------------------------------------\n";
+            r += "🔍 EVALUACIÓN DE DESEMPEÑO POR ELEMENTOS DE CONTROL:\n";
+            r += "---------------------------------------------------------------------\n";
+
+            kpis.forEach((k, i) => {
+                let eff = calcularEficienciaKpi(k).toFixed(1);
+                r += `${i+1}. INDICADOR ESTRATÉGICO: ${k.nom}\n`;
+                r += `   Objetivo: ${k.obj} | Alineación: ${k.foda}\n`;
+                r += `   Métrica Numérica: Meta ${k.meta} | Cierre Actual ${k.act} (Eficiencia: ${eff}%)\n`;
+                r += `   Peso Relativo Asignado: ${k.peso}% | Dirección de Medición: ${k.direccion}\n`;
+                
+                if (eff < 75) {
+                    let plan = planesContingencia[k.id] || "No se ha redactado una estrategia correctiva de mitigación.";
+                    r += `   🚨 ACCIÓN DE CONTINGENCIA CONSULTORA: ${plan}\n`;
+                }
+                r += `---------------------------------------------------------------------\n`;
+            });
+
+            let blob = new Blob([r], { type: "text/plain;charset=utf-8" });
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "Dictamen_De_Auditoria_Competitiva.txt";
+            a.click();
+        }
+
+        function borrarTodo() {
+            if(confirm("¿Seguro que desea resetear por completo todo el núcleo estratégico de la base de datos?")){
+                localStorage.clear();
+                kpis = []; planesContingencia = {};
+                ['mision','vision','foda_f','foda_o','foda_d','foda_a'].forEach(id => document.getElementById(id).value = '');
+                actualizarPesoDisponible();
+                renderTabla();
+                alert("Core del sistema restablecido.");
+            }
+        }
+    </script>
+<script>
+        let kpis = JSON.parse(localStorage.getItem('sc_kpis')) || [];
+        let planesContingencia = JSON.parse(localStorage.getItem('sc_planes')) || {};
+        let charts = {};
+
+        window.onload = function() {
+            // --- AQUÍ ESTÁ EL PASO 2: EL GUARDIÁN DE SEGURIDAD ---
+            if (localStorage.getItem('sc_sesion_activa') !== 'true') {
+                alert("Acceso denegado: Debe autenticarse primero en el portal.");
+                window.location.href = "index.html"; // Lo expulsa si no inició sesión
+                return;
+            }
+            // -----------------------------------------------------
+
+            ['mision','vision','foda_f','foda_o','foda_d','foda_a'].forEach(id => {
+                document.getElementById(id).value = localStorage.getItem('sc_' + id) || '';
+            });
+            actualizarPesoDisponible();
+            renderTabla();
+        };
