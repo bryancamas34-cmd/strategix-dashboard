@@ -65,10 +65,14 @@
         .rec-item { background: white; padding: 20px; border-radius: 6px; margin-top: 15px; border: 1px solid #e9d5ff; font-size: 14px; line-height: 1.6; color: #334155; }
         .analisis-en-linea { background: rgba(255,255,255,0.7); font-size: 12.5px; padding: 10px 14px; border-radius: 6px; margin-top: 8px; border-left: 3px solid #64748b; line-height: 1.5; color: #334155; }
 
-        .btn { padding: 14px 30px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn { padding: 14px 30px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-brand { background: var(--brand); color: white; }
         .btn-success { background: var(--success); color: white; }
+        .btn-accent { background: var(--accent); color: white; }
         .btn-del { background: none; border: none; color: var(--danger); cursor: pointer; font-weight: bold; font-size: 22px; }
+        
+        .file-input-wrapper { position: relative; display: inline-block; }
+        .file-input-wrapper input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -87,7 +91,7 @@
             <button class="tab-btn" onclick="switchTab(event, 'tab-matrices')">2. Registro de Matrices</button>
             <button class="tab-btn" onclick="switchTab(event, 'tab-operacion')">3. Despliegue de KPIs e Indicadores</button>
             <button class="tab-btn" onclick="switchTab(event, 'tab-graficas')">4. Inteligencia Visual (Avance de Metas)</button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-reportes')">5. Auditoría de Coherencia Global</button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-reportes')">5. Auditoría y Respaldo Global</button>
         </div>
 
         <div id="tab-identidad" class="tab-content active">
@@ -220,9 +224,17 @@
                 <div id="contenedor_recomendaciones"></div>
             </div>
 
-            <div class="large-panel" style="margin-top:35px; text-align:center; background:#f8fafc;">
-                <button class="btn btn-success" onclick="exportarDataCompleta()">💾 Exportar Informe de Coherencia (.txt)</button>
-                <button class="btn" style="background:#94a3b8; color:white; margin-left:10px;" onclick="borrarTodo()">Limpiar Tablero</button>
+            <div class="large-panel" style="margin-top:35px; text-align:center; background:#f8fafc; padding:40px 20px;">
+                <span class="subsection-title" style="margin-bottom:20px; display:block; color:#475569;">Gobernanza de Datos y Copias de Seguridad</span>
+                
+                <button class="btn btn-success" onclick="exportarDataCompleta()">💾 Exportar Respaldo Completo (.txt)</button>
+                
+                <div class="file-input-wrapper" style="margin-left:10px;">
+                    <button class="btn btn-accent">📂 Cargar Respaldo Técnico</button>
+                    <input type="file" id="importador_archivo" accept=".txt" onchange="importarDataCompleta(event)">
+                </div>
+
+                <button class="btn" style="background:#ef4444; color:white; margin-left:10px;" onclick="borrarTodo()">Limpiar Tablero</button>
             </div>
         </div>
     </div>
@@ -235,11 +247,15 @@
             if (localStorage.getItem('sc_sesion_activa') !== 'true') {
                 alert("Acceso denegado."); window.location.href = "index.html"; return;
             }
+            cargarCamposTexto();
+            renderTabla();
+        };
+
+        function cargarCamposTexto() {
             ['emp_nombre','emp_sector','emp_porter','emp_resumen','mision','vision','matriz_fo','matriz_fa','matriz_do','matriz_da','matriz_mie','matriz_mge','matriz_mcpe'].forEach(id => {
                 let el = document.getElementById(id); if(el) el.value = localStorage.getItem('sc_' + id) || '';
             });
-            renderTabla();
-        };
+        }
 
         function guardarIdentidad() {
             ['emp_nombre','emp_sector','emp_porter','emp_resumen','mision','vision','matriz_fo','matriz_fa','matriz_do','matriz_da','matriz_mie','matriz_mge','matriz_mcpe'].forEach(id => {
@@ -262,7 +278,6 @@
             if(tabId === 'tab-reportes') calcularDashboardReportes();
         }
 
-        // GENERADOR INTELIGENTE DE RECOMENDACIONES EN LÍNEA POR INDICADOR
         function generarAnalisisInteligente(nom, eff, estrategia) {
             if (eff >= 95) {
                 return `🟢 <strong>Análisis de Logro:</strong> El indicador presenta un desempeño sobresaliente (${eff.toFixed(1)}%). <strong>Recomendación:</strong> Se está logrando una perfecta correspondencia con la estrategia de planificación. Mantener el estándar operativo y documentar como caso de éxito técnico para la evaluación.`;
@@ -331,7 +346,6 @@
             });
         }
 
-        // CONTROL GRÁFICO CORREGIDO: MUESTRA EL AVANCE COMPARATIVO META VS ACTUAL
         function inicializarGraficas() {
             Object.keys(charts).forEach(key => { if(charts[key]) charts[key].destroy(); });
             
@@ -340,10 +354,7 @@
 
             kpis.forEach(k => {
                 let eff = Math.min(120, (k.act / k.meta) * 100);
-                nombres.push(k.nom);
-                metas.push(k.meta);
-                actuales.push(k.act);
-                eficiencias.push(eff.toFixed(1));
+                nombres.push(k.nom); metas.push(k.meta); actuales.push(k.act); eficiencias.push(eff.toFixed(1));
 
                 if(eff >= 95) cVerde++; else if(eff >= 75) cAmarillo++; else cRojo++;
                 
@@ -353,39 +364,30 @@
                 });
             });
 
-            // G1: Distribución General de Estados
             charts.g1 = new Chart(document.getElementById('gPastel').getContext('2d'), {
                 type: 'doughnut',
                 data: { labels: ['Óptimo', 'Alerta', 'Crítico'], datasets: [{ data: [cVerde, cAmarillo, cRojo], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Distribución de Alertas en Objetivos' } } }
             });
 
-            // G2: Gráfico Corregido - Comparativa de Avance Directo (Barras Paralelas)
             charts.g2 = new Chart(document.getElementById('gAvanceBarras').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: nombres,
                     datasets: [
                         { label: 'Meta Planeada', data: metas, backgroundColor: '#cbd5e1' },
-                        { label: 'Valor Conseguido Actual', backgroundColor: '#2563eb', data: actuales }
+                        { label: 'Valor Real', backgroundColor: '#2563eb', data: actuales }
                     ]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { title: { display: true, text: 'Gráfico de Avance Técnico: Meta vs Real' } },
-                    scales: { y: { beginAtZero: true } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Gráfico de Avance Técnico: Meta vs Real' } }, scales: { y: { beginAtZero: true } } }
             });
 
-            // G3: Gráfico Corregido - Radar de Porcentaje de Eficiencia de Objetivos
             charts.g3 = new Chart(document.getElementById('gRadarAvance').getContext('2d'), {
                 type: 'radar',
                 data: { labels: nombres, datasets: [{ label: '% de Cumplimiento Final', data: eficiencias, backgroundColor: 'rgba(37, 99, 235, 0.1)', borderColor: '#2563eb', borderWidth: 2 }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 120 } }, plugins: { title: { display: true, text: 'Simetría de Cumplimiento Estratégico' } } }
             });
 
-            // G4: Matriz de Impacto Ponderado
             charts.g4 = new Chart(document.getElementById('gDispersion').getContext('2d'), {
                 type: 'bubble', data: { datasets: datasetsDispersion },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Matriz de Criticidad (Peso % vs Eficiencia %)' } }, scales: { x: { min: 0, max: 100, title: { display: true, text: 'Peso Estratégico %' } }, y: { min: 0, max: 120, title: { display: true, text: 'Cumplimiento %' } } } }
@@ -439,27 +441,72 @@
             }
         }
 
+        // ==========================================
+        // NUEVAS FUNCIONES DE RESPALDO AUTOMATIZADO
+        // ==========================================
         function exportarDataCompleta() {
-            let nombreEmp = localStorage.getItem('sc_emp_nombre') || 'No Declarada';
-            let r = "=====================================================================\n   INFORME DE TRAZABILIDAD Y COHERENCIA\n=====================================================================\n\n";
-            r += "🏢 ORGANIZACIÓN: " + nombreEmp.toUpperCase() + "\n\n📝 CORE DEL NEGOCIO:\n" + (localStorage.getItem('sc_emp_resumen') || 'N/A') + "\n\n";
-            r += "=====================================================================\n📊 RENDIMIENTO DE INDICADORES VINCULADOS:\n=====================================================================\n";
-            r += "IEEP: " + document.getElementById('eficiencia_global').innerText + "\n\n";
-            kpis.forEach((k, i) => {
-                r += `${i+1}. KPI: ${k.nom} -> Eficiencia: ${((k.act/k.meta)*100).toFixed(1)}%\n   Meta de soporte para: ${k.rel_estrategica || 'N/A'}\n`;
+            let nombreEmp = localStorage.getItem('sc_emp_nombre') || 'Organizacion';
+            
+            // Creamos un paquete estructurado con absolutamente todos los datos guardados
+            let paqueteRespaldo = {
+                kpis: kpis,
+                config: {}
+            };
+            
+            ['emp_nombre','emp_sector','emp_porter','emp_resumen','mision','vision','matriz_fo','matriz_fa','matriz_do','matriz_da','matriz_mie','matriz_mge','matriz_mcpe'].forEach(id => {
+                paqueteRespaldo.config[id] = localStorage.getItem('sc_' + id) || '';
             });
-            let blob = new Blob([r], { type: "text/plain;charset=utf-8" });
-            let a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-            a.download = `Auditoria_Coherencia_${nombreEmp.replace(/\s+/g, '_')}.txt`; a.click();
+
+            let strData = JSON.stringify(paqueteRespaldo);
+            let blob = new Blob([strData], { type: "text/plain;charset=utf-8" });
+            let a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `RESPALDO_STRATEGIX_${nombreEmp.replace(/\s+/g, '_')}.txt`;
+            a.click();
+        }
+
+        function importarDataCompleta(event) {
+            let archivo = event.target.files[0];
+            if (!archivo) return;
+
+            let lector = new FileReader();
+            lector.onload = function(e) {
+                try {
+                    let datosParseados = JSON.parse(e.target.result);
+                    
+                    if (!datosParseados.kpis || !datosParseados.config) {
+                        throw new Error("Formato de respaldo inválido");
+                    }
+
+                    // Restaurar los KPIs
+                    kpis = datosParseados.kpis;
+                    localStorage.setItem('sc_kpis', JSON.stringify(kpis));
+
+                    // Restaurar las matrices y campos de texto
+                    Object.keys(datosParseados.config).forEach(key => {
+                        localStorage.setItem('sc_' + key, datosParseados.config[key]);
+                    });
+
+                    // Recargar la UI y campos
+                    cargarCamposTexto();
+                    renderTabla();
+                    
+                    alert("¡Copia de respaldo importada con éxito total! Todos tus objetivos y matrices han sido restaurados.");
+                } catch (error) {
+                    alert("Error crítico: El archivo cargado no es un archivo de respaldo legítimo de Strategix Suite o está corrupto.");
+                }
+            };
+            lector.readAsText(archivo);
         }
 
         function borrarTodo() {
-            if(confirm("¿Resetear la base de datos de control institucional?")){
+            if(confirm("¿Resetear la base de datos de control institucional? Todo lo que no hayas exportado se perderá definitivamente.")){
                 localStorage.clear(); localStorage.setItem('sc_sesion_activa', 'true'); kpis = [];
                 ['emp_nombre','emp_sector','emp_porter','emp_resumen','mision','vision','matriz_fo','matriz_fa','matriz_do','matriz_da','matriz_mie','matriz_mge','matriz_mcpe'].forEach(id => {
                     let el = document.getElementById(id); if(el) el.value = '';
                 });
-                renderTabla(); alert("Limpieza completa.");
+                renderTabla();
+                alert("Base de datos limpia.");
             }
         }
     </script>
